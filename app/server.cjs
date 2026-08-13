@@ -1853,20 +1853,32 @@ app.post("/api/auth/login", (req, res) => {
       createdAt: (/* @__PURE__ */ new Date()).toISOString(),
       simulatedDayOffset: 0,
       favorites: [],
-      completedBingo: []
+      completedBingo: [],
+      status: "active"
     };
     saveUsers(usersDB);
   }
   const user = usersDB[normalizedEmail];
+  if (user.status === "refunded" || user.status === "inactive") {
+    return res.status(403).json({
+      error: "Acesso desativado ou reembolsado. Se voc\xEA acredita que isso \xE9 um erro, entre em contato com o suporte."
+    });
+  }
   const stats = computeUserStats(user);
   res.json({ success: true, stats });
 });
 app.get("/api/user/me", (req, res) => {
   const email = req.query.email;
-  if (!email || !usersDB[email.trim().toLowerCase()]) {
+  const normalizedEmail = (email || "").trim().toLowerCase();
+  if (!normalizedEmail || !usersDB[normalizedEmail]) {
     return res.status(404).json({ error: "Usu\xE1rio n\xE3o encontrado." });
   }
-  const user = usersDB[email.trim().toLowerCase()];
+  const user = usersDB[normalizedEmail];
+  if (user.status === "refunded" || user.status === "inactive") {
+    return res.status(403).json({
+      error: "Acesso desativado ou reembolsado. Se voc\xEA acredita que isso \xE9 um erro, entre em contato com o suporte."
+    });
+  }
   const stats = computeUserStats(user);
   res.json(stats);
 });
@@ -1973,6 +1985,42 @@ app.post("/api/roulette/spin", (req, res) => {
     card: selectedCard,
     category,
     timestamp: (/* @__PURE__ */ new Date()).toISOString()
+  });
+});
+app.post(["/api/webhook/cakto", "/api/cakto/webhook"], (req, res) => {
+  const body = req.body || {};
+  console.log("Recebido Webhook Cakto:", JSON.stringify(body));
+  const emailRaw = body.customer?.email || body.buyer?.email || body.client?.email || body.data?.customer?.email || body.data?.buyer?.email || body.email || body.data?.email;
+  if (!emailRaw || typeof emailRaw !== "string") {
+    return res.status(400).json({ error: "E-mail do comprador n\xE3o encontrado no payload do webhook." });
+  }
+  const normalizedEmail = emailRaw.trim().toLowerCase();
+  const event = String(body.event || body.event_type || body.status || body.data?.status || "").toLowerCase();
+  const isApproved = event.includes("approved") || event.includes("paid") || event.includes("pago") || event.includes("aprovad") || event.includes("completed") || event === "active";
+  const isRefunded = event.includes("refund") || event.includes("reembols") || event.includes("chargeback") || event.includes("cancel") || event.includes("devolu") || event === "inactive";
+  if (!usersDB[normalizedEmail]) {
+    usersDB[normalizedEmail] = {
+      email: normalizedEmail,
+      createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+      simulatedDayOffset: 0,
+      favorites: [],
+      completedBingo: [],
+      status: isRefunded ? "refunded" : "active"
+    };
+  } else {
+    if (isApproved) {
+      usersDB[normalizedEmail].status = "active";
+    } else if (isRefunded) {
+      usersDB[normalizedEmail].status = "refunded";
+    }
+  }
+  saveUsers(usersDB);
+  console.log(`[Cakto Webhook] E-mail: ${normalizedEmail} -> Status: ${usersDB[normalizedEmail].status}`);
+  return res.json({
+    success: true,
+    email: normalizedEmail,
+    status: usersDB[normalizedEmail].status,
+    message: `Acesso do cliente ${normalizedEmail} atualizado para ${usersDB[normalizedEmail].status}.`
   });
 });
 async function startServer() {
