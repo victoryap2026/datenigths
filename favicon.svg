@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#fb7185"/>
+      <stop offset="50%" stop-color="#e11d48"/>
+      <stop offset="100%" stop-color="#881337"/>
+    </linearGradient>
+    <linearGradient id="diceGrad" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#ffe4e6"/>
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0" y1="0" x2="20" y2="20" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000000" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Background Card -->
+  <rect width="64" height="64" rx="16" fill="url(#bgGrad)"/>
+  
+  <!-- Outer Glow Border -->
+  <rect x="1.5" y="1.5" width="61" height="61" rx="14.5" stroke="#fecdd3" stroke-width="1.5" stroke-opacity="0.4"/>
+
+  <!-- Left Die -->
+  <g transform="translate(11, 19) rotate(-10)" filter="url(#shadow)">
+    <rect width="22" height="22" rx="5" fill="url(#diceGrad)" stroke="#fda4af" stroke-width="1"/>
+    <!-- Dice Pips (5 dots) -->
+    <circle cx="5.5" cy="5.5" r="2" fill="#be123c"/>
+    <circle cx="16.5" cy="5.5" r="2" fill="#be123c"/>
+    <circle cx="11" cy="11" r="2" fill="#be123c"/>
+    <circle cx="5.5" cy="16.5" r="2" fill="#be123c"/>
+    <circle cx="16.5" cy="16.5" r="2" fill="#be123c"/>
+  </g>
+
+  <!-- Right Die -->
+  <g transform="translate(30, 22) rotate(12)" filter="url(#shadow)">
+    <rect width="22" height="22" rx="5" fill="url(#diceGrad)" stroke="#fda4af" stroke-width="1"/>
+    <!-- Dice Pips (6 dots) -->
+    <circle cx="5.5" cy="5.5" r="1.8" fill="#e11d48"/>
+    <circle cx="16.5" cy="5.5" r="1.8" fill="#e11d48"/>
+    <circle cx="5.5" cy="11" r="1.8" fill="#e11d48"/>
+    <circle cx="16.5" cy="11" r="1.8" fill="#e11d48"/>
+    <circle cx="5.5" cy="16.5" r="1.8" fill="#e11d48"/>
+    <circle cx="16.5" cy="16.5" r="1.8" fill="#e11d48"/>
+  </g>
+
+  <!-- Sparkle Heart Overlay -->
+  <path d="M 32 10 C 29 6, 23 7, 23 12 C 23 17, 32 22, 32 22 C 32 22, 41 17, 41 12 C 41 7, 35 6, 32 10 Z" 
+        fill="url(#goldGrad)" filter="url(#shadow)"/>
+</svg>
