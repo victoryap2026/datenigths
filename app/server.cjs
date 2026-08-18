@@ -457,8 +457,14 @@ function computeUserStats(user) {
     };
   }
   const now = (/* @__PURE__ */ new Date()).getTime();
-  const created = new Date(user.createdAt).getTime();
-  const diffTime = Math.max(0, now - created);
+  let createdTime = now;
+  if (user.createdAt) {
+    const parsed = new Date(user.createdAt).getTime();
+    if (!isNaN(parsed) && parsed > 0) {
+      createdTime = parsed;
+    }
+  }
+  const diffTime = Math.max(0, now - createdTime);
   const realDaysElapsed = Math.floor(diffTime / (1e3 * 60 * 60 * 24)) + 1;
   const effectiveDays = Math.max(1, Math.min(CATEGORIES.length, realDaysElapsed + (user.simulatedDayOffset || 0)));
   const unlockedCategoriesCount = effectiveDays;
@@ -654,7 +660,8 @@ app.post(["/api/webhook/cakto", "/api/cakto/webhook"], async (req, res) => {
         status: newStatus,
         favorites: [],
         completed_bingo: [],
-        simulated_day_offset: 0
+        simulated_day_offset: 0,
+        created_at: (/* @__PURE__ */ new Date()).toISOString()
       });
       if (insertError) {
         console.error("Erro ao inserir usu\xE1rio no Supabase:", insertError);
